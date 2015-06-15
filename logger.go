@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"bytes"
 	"io/ioutil"
 
 	"github.com/dustin/go-humanize"
@@ -65,8 +66,9 @@ func (l *Logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	res := &wrapper{w, 0, 200}
 
-	b, _ := ioutil.ReadAll(r.Body)
-	body := string(b)
+	buf, _ := ioutil.ReadAll(r.Body)
+	body := string(buf)
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(buf))
 
 	l.log.Info(">> %s %s %s", r.Method, r.RequestURI, body)
 	l.h.ServeHTTP(res, r)
